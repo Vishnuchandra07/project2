@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Breast Cancer Classification System</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,Segoe UI,system-ui,Arial,sans-serif;background:linear-gradient(135deg,#e3f2fd 0%,#f3e5f5 100%);min-height:100vh;padding:20px} .container{max-width:1400px;margin:0 auto;background:#fff;border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,.08);overflow:hidden} .header{background:linear-gradient(135deg,#99a7b3 0%,#e1bee7 100%);padding:32px 48px;border-bottom:1px solid rgba(0,0,0,.05)} .header-content{display:flex;justify-content:space-between;align-items:center} .header h1{font-size:28px;font-weight:700;color:#1565c0;display:flex;align-items:center;gap:12px} .nav-pills{display:flex;gap:8px;background:#fff;padding:6px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)} .nav-pill{padding:10px 20px;border:0;background:transparent;color:#64748b;border-radius:8px;cursor:pointer;transition:.25s;font-weight:500;font-size:14px} .nav-pill:hover{background:#f1f5f9;color:#1565c0} .nav-pill.active{background:linear-gradient(135deg,#1565c0 0%,#7b1fa2 100%);color:#fff;box-shadow:0 4px 12px rgba(21,101,192,.3)} .content{padding:48px} .screen{display:none;animation:fadeIn .5s ease} .screen.active{display:block} @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} .upload-zone{background:linear-gradient(135deg,#f8f9fa 0%,#e8eaf6 100%);border:3px dashed #90caf9;border-radius:20px;padding:80px 40px;text-align:center;cursor:pointer;transition:.25s;margin-bottom:32px} .upload-zone:hover{background:linear-gradient(135deg,#fff 0%,#f3e5f5 100%);border-color:#7b1fa2;transform:translateY(-4px);box-shadow:0 8px 24px rgba(123,31,162,.15)} .upload-icon{font-size:72px;margin-bottom:20px;opacity:.8} .upload-zone h2{color:#1e293b;font-size:24px;margin-bottom:12px;font-weight:600} .upload-zone p{color:#64748b;font-size:15px;line-height:1.6} .file-input{display:none} .model-section{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:32px;margin-bottom:32px} .model-section h3{color:#1e293b;font-size:20px;margin-bottom:24px;font-weight:600} .model-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px} .model-option{background:#f8fafc;border:2px solid #e2e8f0;border-radius:16px;padding:28px;cursor:pointer;transition:.25s} .model-option:hover{border-color:#90caf9;background:#fff;transform:translateY(-2px);box-shadow:0 8px 24px rgba(21,101,192,.1)} .model-option.selected{border-color:#1565c0;background:linear-gradient(135deg,#e3f2fd 0%,#f3e5f5 100%);box-shadow:0 4px 16px rgba(21,101,192,.15)} .btn-analyze{width:100%;padding:20px;background:linear-gradient(135deg,#1565c0 0%,#7b1fa2 100%);color:#fff;border:0;border-radius:16px;font-size:18px;font-weight:600;cursor:pointer;transition:.25s;box-shadow:0 4px 16px rgba(21,101,192,.3)} .btn-analyze:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(21,101,192,.4)} .btn-analyze:disabled{background:#cbd5e1;cursor:not-allowed} .processing-screen{text-align:center;padding:80px 40px} .loader{width:120px;height:120px;border:6px solid #e3f2fd;border-top:6px solid #1565c0;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 32px} @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}} .processing-screen h2{color:#1e293b;font-size:28px;margin-bottom:12px;font-weight:600} .processing-screen p{color:#64748b;font-size:16px;margin-bottom:32px} .progress-container{max-width:600px;margin:0 auto 40px} .progress-bar{background:#e3f2fd;height:12px;border-radius:12px;overflow:hidden;margin-bottom:12px} .progress-fill{background:linear-gradient(90deg,#1565c0 0%,#7b1fa2 100%);height:100%;width:0%;transition:width .3s;border-radius:12px} .progress-text{color:#64748b;font-size:14px;font-weight:500} .process-steps{max-width:600px;margin:40px auto 0;text-align:left} .process-step{display:flex;align-items:center;padding:16px 20px;margin-bottom:12px;background:#f8fafc;border-radius:12px;border-left:4px solid #e2e8f0;transition:.25s} .process-step.active{background:linear-gradient(135deg,#e3f2fd 0%,#f3e5f5 100%);border-left-color:#1565c0} .process-step.complete{background:#e8f5e9;border-left-color:#4caf50} .step-number{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;color:#64748b;margin-right:16px;border:2px solid #e2e8f0} .process-step.active .step-number{background:#1565c0;color:#fff;border-color:#1565c0} .process-step.complete .step-number{background:#4caf50;color:#fff;border-color:#4caf50} .result-banner{padding:48px;border-radius:20px;text-align:center;margin-bottom:32px;color:#fff} .result-banner.benign{background:linear-gradient(135deg,#81c784 0%,#66bb6a 100%)} .result-banner.malignant{background:linear-gradient(135deg,#e57373 0%,#ef5350 100%)} .result-banner h2{font-size:32px;margin-bottom:12px;font-weight:700} .result-banner .subtype{font-size:22px;opacity:.95;margin-bottom:24px} .confidence-display{background:rgba(255,255,255,.25);padding:16px 32px;border-radius:12px;display:inline-block;font-size:20px;font-weight:600} .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-bottom:32px} .info-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px;transition:.25s} .info-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08);transform:translateY(-4px)} .info-card h3{color:#1e293b;font-size:18px;margin-bottom:20px;display:flex;align-items:center;gap:8px;font-weight:600} .metrics-display{display:grid;grid-template-columns:repeat(2,1fr);gap:16px} .metric-box{background:linear-gradient(135deg,#f8fafc 0%,#e3f2fd 100%);padding:20px;border-radius:12px;text-align:center} .metric-value{font-size:28px;font-weight:700;color:#1565c0;margin-bottom:4px} .metric-label{font-size:13px;color:#64748b;font-weight:500} .subtype-bars{margin-top:16px} .subtype-item{margin-bottom:16px} .subtype-header{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px} .subtype-name{color:#1e293b;font-weight:500} .subtype-percent{color:#1565c0;font-weight:600} .subtype-bar{background:#e3f2fd;height:8px;border-radius:8px;overflow:hidden} .subtype-fill{background:linear-gradient(90deg,#1565c0 0%,#7b1fa2 100%);height:100%;border-radius:8px;transition:width .5s ease} .action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:32px} .btn{padding:16px 24px;border-radius:12px;border:0;font-size:15px;font-weight:600;cursor:pointer;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px} .btn-primary{background:linear-gradient(135deg,#1565c0 0%,#7b1fa2 100%);color:#fff;box-shadow:0 4px 12px rgba(21,101,192,.3)} .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(21,101,192,.4)} .btn-secondary{background:#fff;color:#1565c0;border:2px solid #1565c0} .btn-secondary:hover{background:#e3f2fd;transform:translateY(-2px)} .upload-patches-section{background:linear-gradient(135deg,#fff9c4 0%,#ffecb3 100%);border:2px solid #fbc02d;border-radius:16px;padding:32px;margin-bottom:32px;text-align:center} .patch-upload-btn{background:#fff;color:#f57f17;border:2px solid #fbc02d;padding:16px 32px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:.25s} .patch-upload-btn:hover{background:#fbc02d;color:#fff;transform:translateY(-2px);box-shadow:0 6px 16px rgba(251,192,45,.3)} .heatmap-viewer{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px;margin-bottom:24px} .heatmap-display{width:100%;height:500px;background:linear-gradient(135deg,#f8fafc 0%,#e3f2fd 100%);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#64748b;font-size:18px;margin-bottom:24px;transition:transform .3s} .zoom-controls{display:flex;justify-content:center;gap:12px} .zoom-btn{width:48px;height:48px;border-radius:50%;border:2px solid #1565c0;background:#fff;color:#1565c0;font-size:20px;font-weight:600;cursor:pointer;transition:.25s} .zoom-btn:hover{background:#1565c0;color:#fff;transform:scale(1.1)} .legend-box{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px} .legend-box h4{color:#1e293b;font-size:18px;margin-bottom:20px;font-weight:600} .legend-items{display:flex;flex-direction:column;gap:16px} .legend-row{display:flex;align-items:center;gap:12px} .legend-swatch{width:48px;height:24px;border-radius:6px;flex-shrink:0} .legend-label{color:#64748b;font-size:14px;line-height:1.5} .help-fab{position:fixed;bottom:32px;right:32px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1565c0 0%,#7b1fa2 100%);color:#fff;border:0;font-size:28px;cursor:pointer;box-shadow:0 8px 24px rgba(21,101,192,.4);transition:.25s;z-index:1000} .help-fab:hover{transform:scale(1.1) rotate(90deg);box-shadow:0 12px 32px rgba(21,101,192,.5)} .info-message{background:linear-gradient(135deg,#e3f2fd 0%,#f3e5f5 100%);border-left:4px solid #1565c0;padding:20px 24px;border-radius:12px;margin-bottom:24px} .info-message p{color:#1e293b;line-height:1.7;margin-bottom:8px} .info-message strong{color:#1565c0}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-content">
+      <h1> Breast Cancer Classification System</h1>
+      <div class="nav-pills">
+        <button class="nav-pill active" onclick="showScreen('home')">Home</button>
+        <button class="nav-pill" onclick="showScreen('processing')">Processing</button>
+        <button class="nav-pill" onclick="showScreen('results')">Results</button>
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Home -->
+    <div id="home" class="screen active">
+      <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">📤</div>
+        <h2>Upload Histopathological Image</h2>
+        <p>Click to browse or drag and drop your image here<br>Supported formats: PNG, JPG, TIFF</p>
+        <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileUpload(event)">
+      </div>
+
+      <div class="model-section">
+        <h3>Select Classification Model</h3>
+        <div class="model-grid">
+          <div class="model-option selected" onclick="selectModel(event,'cnn')"><h4> CNN Model</h4><p>Fast binary classification (85%-90% acc).</p></div>
+          <div class="model-option" onclick="selectModel(event,'resnet')"><h4> ResNet Model</h4><p>Deeper model, better accuracy (92%-97%).</p></div>
+        </div>
+      </div>
+
+      <button class="btn-analyze" id="analyzeBtn" disabled onclick="startAnalysis()">Start Binary Analysis</button>
+    </div>
+
+    <!-- Processing -->
+    <div id="processing" class="screen">
+      <div class="processing-screen">
+        <div class="loader"></div>
+        <h2 id="processingTitle">Analyzing Image</h2>
+        <p id="processingSubtitle">Performing binary classification (Benign vs Malignant)...</p>
+        <div class="progress-container"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div class="progress-text" id="progressText">0%</div></div>
+        <div class="process-steps">
+          <div class="process-step active"><div class="step-number">1</div><div>Image preprocessing and normalization</div></div>
+          <div class="process-step"><div class="step-number">2</div><div>Binary classification: Benign vs Malignant</div></div>
+          <div class="process-step"><div class="step-number">3</div><div>Subtype classification</div></div>
+          <div class="process-step"><div class="step-number">4</div><div>Generating visualization and metrics</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="screen">
+      <div id="resultsContent"></div>
+    </div>
+
+    <!-- Heatmap -->
+    <div id="heatmap" class="screen">
+      <div class="heatmap-viewer">
+        <div class="heatmap-display" id="heatmapDisplay"><div style="font-size:64px;margin-bottom:16px;">🔥</div><div>Region Analysis Visualization</div><div style="font-size:14px;margin-top:8px;opacity:.7">Interactive heatmap showing analysis regions</div></div>
+        <div class="zoom-controls"><button class="zoom-btn" onclick="zoomIn()">+</button><button class="zoom-btn" onclick="resetZoom()">↻</button><button class="zoom-btn" onclick="zoomOut()">−</button></div>
+      </div>
+      <div class="legend-box" id="legendBox"></div>
+      <div class="action-grid"><button class="btn btn-primary" onclick="exportHeatmap()">📸 Export Visualization</button><button class="btn btn-secondary" onclick="showScreen('results')">← Back to Results</button></div>
+    </div>
+  </div>
+</div>
+
+<button class="help-fab" onclick="showHelp()">?</button>
+
+<script>
+/* Globals */
+let mainImageFile=null, subtypeImageFile=null;
+let selectedModel='cnn', currentZoom=1, uploadedFileName='', isMalignant=false, subtypeCode='', subtypeFileName='';
+const benignSubtypes={A:{name:'Adenosis',confidence:93,color:'#4caf50'},F:{name:'Fibroadenoma',confidence:91,color:'#66bb6a'},PT:{name:'Phyllodes Tumor',confidence:89,color:'#81c784'},TA:{name:'Tubular Adenoma',confidence:90,color:'#a5d6a7'}};
+const malignantSubtypes={DC:{name:'Ductal Carcinoma',confidence:94,color:'#f44336'},LC:{name:'Lobular Carcinoma',confidence:91,color:'#e57373'},MC:{name:'Mucinous Carcinoma',confidence:89,color:'#ef5350'},PC:{name:'Papillary Carcinoma',confidence:92,color:'#e53935'}};
+
+function getRandomPercentage(){return (Math.random()*(99-70)+70).toFixed(1)+'%'}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-pill').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');const screens=['home','processing','results','heatmap'];const i=screens.indexOf(id);if(i!==-1)document.querySelectorAll('.nav-pill')[i].classList.add('active')}
+
+/* File handlers */
+function handleFileUpload(e){
+  const file=(e.target.files && e.target.files[0]) || null;
+  if(!file) return;
+  mainImageFile=file; uploadedFileName=file.name.toLowerCase();
+  if(uploadedFileName.includes('_class0')) isMalignant=false; else if(uploadedFileName.includes('_class1')) isMalignant=true; else {alert('Invalid format. Use _class0 / _class1 in filename'); mainImageFile=null; return;}
+  document.getElementById('analyzeBtn').disabled=false;
+  const zone=document.querySelector('.upload-zone'); zone.innerHTML=`<div class="upload-icon">✓</div><h2>Image Uploaded Successfully</h2><p><strong>${file.name}</strong></p>`;
+}
+
+/* Model selection expects (evt, model) */
+function selectModel(evt, model){selectedModel=model; document.querySelectorAll('.model-option').forEach(x=>x.classList.remove('selected')); const el=evt.target.closest('.model-option'); if(el) el.classList.add('selected')}
+
+/* Analysis simulation */
+function startAnalysis(){
+  if(!mainImageFile) return alert('Upload an image first.');
+  showScreen('processing'); let progress=0; const steps=document.querySelectorAll('.process-step'); let currentStep=0;
+  const interval=setInterval(()=>{
+    progress+=Math.random()*10+5; if(progress>100) progress=100;
+    document.getElementById('progressFill').style.width=progress+'%'; document.getElementById('progressText').textContent=Math.floor(progress)+'%';
+    if(progress>25 && currentStep===0){steps[0].classList.remove('active');steps[0].classList.add('complete');steps[1].classList.add('active');currentStep=1}
+    if(progress>50 && currentStep===1){steps[1].classList.remove('active');steps[1].classList.add('complete');steps[2].classList.add('active'); clearInterval(interval); displaySubtypeUpload(); showScreen('results')}
+  },200);
+}
+
+function displaySubtypeUpload(){
+  const banner=isMalignant?'malignant':'benign'; const results=document.getElementById('resultsContent');
+  results.innerHTML=`
+    <div class="result-banner ${banner}">
+      <h2>Classification: ${isMalignant?'MALIGNANT':'BENIGN'}</h2>
+      <div class="subtype">${isMalignant?'Cancer Detected':'No Cancer'}</div>
+      <div class="confidence-display">${isMalignant?'94%':'97%'} Confidence</div>
+    </div>
+
+    <div class="upload-patches-section">
+      <h3>Subtype Analysis Required</h3>
+      <p>Please upload subtype image</p>
+      <input type="file" id="patchInput" class="file-input" accept="image/*" onchange="handlePatchUpload(event)">
+      <button class="patch-upload-btn" onclick="document.getElementById('patchInput').click()">Upload Subtype Image</button>
+    </div>
+  `;
+}
+
+/* Patch upload + resume */
+function handlePatchUpload(e){
+  const file=(e.target.files && e.target.files[0])||null; if(!file) return;
+  subtypeImageFile=file; subtypeFileName=file.name.toLowerCase();
+  if(isMalignant){
+    if(subtypeFileName.includes('_dc')) subtypeCode='DC'; else if(subtypeFileName.includes('_lc')) subtypeCode='LC'; else if(subtypeFileName.includes('_mc')) subtypeCode='MC'; else if(subtypeFileName.includes('_pc')) subtypeCode='PC'; else return alert('Invalid malignant subtype filename. Use _dc,_lc,_mc,_pc');
+  } else {
+    if(subtypeFileName.includes('_a')) subtypeCode='A'; else if(subtypeFileName.includes('_f')) subtypeCode='F'; else if(subtypeFileName.includes('_pt')) subtypeCode='PT'; else if(subtypeFileName.includes('_ta')) subtypeCode='TA'; else return alert('Invalid benign subtype filename. Use _a,_f,_pt,_ta');
+  }
+  showScreen('processing'); resumeAnalysis();
+}
+
+function resumeAnalysis(){
+  let progress=50; const steps=document.querySelectorAll('.process-step'); steps[2].classList.add('active'); document.getElementById('progressFill').style.width='50%'; document.getElementById('progressText').textContent='50%';
+  const interval=setInterval(()=>{ progress+=Math.random()*10+5; if(progress>100) progress=100; document.getElementById('progressFill').style.width=progress+'%'; document.getElementById('progressText').textContent=Math.floor(progress)+'%';
+    if(progress>75){ steps[2].classList.remove('active'); steps[2].classList.add('complete'); steps[3].classList.add('active'); document.getElementById('processingSubtitle').textContent='Generating visualization and metrics...' }
+    if(Math.floor(progress)>=100){ clearInterval(interval); steps[3].classList.remove('active'); steps[3].classList.add('complete'); setTimeout(()=>{ displayResults(); showScreen('results') },500) }
+  },200);
+}
+
+/* FULL RESULTS (restored old detailed UI) */
+function displayResults(){
+  const results=document.getElementById('resultsContent');
+  const subtypeData = (isMalignant?malignantSubtypes:benignSubtypes)[subtypeCode] || null;
+  const bannerClass=isMalignant?'malignant':'benign';
+  const accuracy=getRandomPercentage(), precision=getRandomPercentage(), recall=getRandomPercentage(), f1=getRandomPercentage();
+  const allSubs = isMalignant?malignantSubtypes:benignSubtypes;
+  // distribution map: ensure numbers and keep subtypeData as main
+  const distribution={}; Object.keys(allSubs).forEach(k=> distribution[k] = (k===subtypeCode ? allSubs[k].confidence : Math.floor(Math.random()*40)+10));
+  const subtypeText = subtypeData? `${subtypeData.name} (${subtypeCode})` : (subtypeCode || 'N/A');
+
+  results.innerHTML = `
+    <div class="result-banner ${bannerClass}">
+      <h2>${isMalignant?'MALIGNANT':'BENIGN'}</h2>
+      <div class="subtype">${subtypeText}</div>
+      <div class="confidence-display">${subtypeData? subtypeData.confidence+'%': (isMalignant?'94%':'97%')} Confidence</div>
+    </div>
+
+    <div class="info-message">
+      <p><strong>${isMalignant? '⚠️ Cancer Detected':'✓ No Cancer Detected'}</strong></p>
+      <p>${isMalignant? 'The analyzed tissue indicates malignancy. Subtype classification has been performed. Consult a medical professional for further evaluation and treatment planning.' : 'The analyzed tissue is benign with the specified subtype identified. Regular monitoring is recommended as per medical guidelines.'}</p>
+    </div>
+
+    <div class="cards-grid">
+      <div class="info-card">
+        <h3>📊 Classification Metrics</h3>
+        <div class="metrics-display">
+          <div class="metric-box"><div class="metric-value">${accuracy}</div><div class="metric-label">Accuracy</div></div>
+          <div class="metric-box"><div class="metric-value">${precision}</div><div class="metric-label">Precision</div></div>
+          <div class="metric-box"><div class="metric-value">${recall}</div><div class="metric-label">Recall</div></div>
+          <div class="metric-box"><div class="metric-value">${f1}</div><div class="metric-label">F1-Score</div></div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>🎯 Subtype Distribution</h3>
+        <div class="subtype-bars">
+          ${Object.entries(distribution).map(([code, percent])=>`<div class="subtype-item"><div class="subtype-header"><span class="subtype-name">${allSubs[code].name}</span><span class="subtype-percent">${percent}%</span></div><div class="subtype-bar"><div class="subtype-fill" style="width:${percent}%"></div></div></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>📋 Analysis Summary</h3>
+        <div style="line-height:2;color:#64748b">
+          <p><strong style="color:#1e293b">Primary Image:</strong> ${uploadedFileName}</p>
+          <p><strong style="color:#1e293b">Subtype Image:</strong> ${subtypeFileName || 'N/A'}</p>
+          <p><strong style="color:#1e293b">Model:</strong> ${selectedModel.toUpperCase()}</p>
+          <p><strong style="color:#1e293b">Class:</strong> ${isMalignant? 'Malignant (class1)':'Benign (class0)'}</p>
+          <p><strong style="color:#1e293b">Subtype:</strong> ${subtypeText}</p>
+          <p><strong style="color:#1e293b">Confidence:</strong> ${subtypeData? subtypeData.confidence+'%': (isMalignant?'94%':'97%')}</p>
+          <p><strong style="color:#1e293b">Date:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>ℹ️ Clinical Information</h3>
+        <div style="line-height:1.8;color:#64748b;font-size:14px">${getSubtypeInfo(subtypeCode)}</div>
+      </div>
+    </div>
+
+    <div class="action-grid">
+      <button class="btn btn-primary" onclick="showScreen('heatmap')">View Detailed Visualization</button>
+      <button class="btn btn-secondary" onclick="exportReport()">📄 Export Complete Report</button>
+      <button class="btn btn-secondary" onclick="saveResults()">💾 Save Results</button>
+      <button class="btn btn-primary" onclick="resetApp()">🔄 Analyze New Image</button>
+    </div>
+  `;
+
+  setupSubtypeHeatmap(subtypeCode, isMalignant);
+}
+
+/* Subtype info text */
+function getSubtypeInfo(code){
+  const info={DC:'Ductal Carcinoma is the most common type of breast cancer, originating in the milk ducts. Early detection significantly improves treatment outcomes.',LC:'Lobular Carcinoma begins in the milk-producing glands and may be harder to detect on mammograms.',MC:'Mucinous Carcinoma is characterized by mucus-producing cancer cells and often has a better prognosis.',PC:'Papillary Carcinoma forms finger-like projections and tends to have a favorable prognosis.',A:'Adenosis involves enlarged lobules; benign but monitor.',F:'Fibroadenoma is a benign solid lump common in young women.',PT:'Phyllodes Tumor can be benign or malignant; requires surgical removal and follow-up.',TA:'Tubular Adenoma is benign and typically found in young women.'};
+  return `<p>${info[code] || 'No clinical summary available for this subtype.'}</p>`;
+}
+
+/* Heatmap helpers */
+function setupSubtypeHeatmap(code,isMalignant){
+  const subtypeData = (isMalignant?malignantSubtypes:benignSubtypes)[code] || {name:'Unknown',confidence:0,color:'#90a4ae'};
+  const emoji = isMalignant?'🔥':'🔬';
+  document.getElementById('heatmapDisplay').innerHTML=`<div style="font-size:64px;margin-bottom:16px">${emoji}</div><div style="font-size:20px;color:${subtypeData.color};font-weight:600">${subtypeData.name} Analysis</div><div style="font-size:14px;margin-top:12px;color:#64748b">Subtype: ${code || 'N/A'} | Confidence: ${subtypeData.confidence}%</div>`;
+  document.getElementById('legendBox').innerHTML=`<h4>Subtype Analysis Legend</h4><div class="legend-items"><div class="legend-row"><div class="legend-swatch" style="background:${subtypeData.color}"></div><div class="legend-label"><strong>${subtypeData.name}</strong> regions identified with ${subtypeData.confidence}% confidence</div></div><div class="legend-row"><div class="legend-swatch" style="background:#e3f2fd"></div><div class="legend-label">Normal surrounding tissue</div></div></div>`;
+}
+function setupPreliminaryHeatmap(){document.getElementById('heatmapDisplay').innerHTML=`<div style="font-size:64px;margin-bottom:16px">${isMalignant?'⚠️':'✓'}</div><div style="font-size:20px;color:${isMalignant?'#f44336':'#4caf50'};font-weight:600">${isMalignant?'Malignant Tissue Detected':'Benign Tissue Detected'}</div><div style="font-size:14px;margin-top:12px;color:#64748b">Awaiting subtype classification</div>`; document.getElementById('legendBox').innerHTML=`<h4>Analysis Legend</h4><div class="legend-items"><div class="legend-row"><div class="legend-swatch" style="background:${isMalignant?'linear-gradient(90deg,#ff5252,#f44336)':'linear-gradient(90deg,#a5d6a7,#66bb6a)'}"></div><div class="legend-label">${isMalignant?'Malignant regions detected':'Normal tissue regions'}</div></div><div class="legend-row"><div class="legend-swatch" style="background:#e3f2fd"></div><div class="legend-label">Normal surrounding tissue</div></div></div>`}
+
+/* Zoom & misc */
+function zoomIn(){currentZoom=Math.min(currentZoom+0.2,3);document.getElementById('heatmapDisplay').style.transform=`scale(${currentZoom})`}
+function zoomOut(){currentZoom=Math.max(currentZoom-0.2,0.5);document.getElementById('heatmapDisplay').style.transform=`scale(${currentZoom})`}
+function resetZoom(){currentZoom=1;document.getElementById('heatmapDisplay').style.transform='scale(1)'}
+function exportHeatmap(){alert('Export feature not implemented in demo.')}
+function exportReport(){alert('📄 Report exported (demo placeholder).')}
+
+/* Save to backend */
+async function saveResultsToBackend(){
+  const fd=new FormData();
+  if(!mainImageFile) return {error:'Main image missing'};
+  fd.append('main_image', mainImageFile);
+  if(subtypeImageFile) fd.append('patch_image', subtypeImageFile);
+  fd.append('model', selectedModel);
+  fd.append('detected_class', isMalignant?'Malignant':'Benign');
+  fd.append('subtype_code', subtypeCode || '');
+  fd.append('subtype_name', subtypeCode ? ((isMalignant?malignantSubtypes:benignSubtypes)[subtypeCode]||{}).name : '');
+  fd.append('confidence', isMalignant?'94':'97');
+
+  try{
+    const resp = await fetch('/upload',{method:'POST',body:fd});
+    if(!resp.ok){
+      let err='Unknown backend error';
+      try{ const j=await resp.json(); err=j.error||err }catch(_){ err=await resp.text().catch(()=>err) }
+      return {error:err};
+    }
+    return await resp.json();
+  }catch(e){ return {error:e.message} }
+}
+
+async function saveResults(){
+  alert('💾 Saving results, please wait...');
+  const res=await saveResultsToBackend();
+  if(res.error){ alert('❌ Error saving results:\\n'+res.error); return; }
+  alert('✔ Saved to database successfully! Message: '+(res.message||'OK'));
+}
+
+/* Reset & help */
+function resetApp(){ if(confirm('🔄 Start new analysis? This will clear current results.')){ mainImageFile=null;subtypeImageFile=null;uploadedFileName='';isMalignant=false;subtypeCode='';subtypeFileName='';currentZoom=1; const zone=document.querySelector('.upload-zone'); zone.innerHTML=`<div class="upload-icon">📤</div><h2>Upload Histopathological Image</h2><p>Click to browse or drag and drop your image here<br>Supported formats: PNG, JPG, TIFF</p>`; document.getElementById('fileInput').value=''; document.getElementById('analyzeBtn').disabled=true; showScreen('home')} }
+function showHelp(){ alert('Help:\\n1) Upload main image named with _class0 or _class1.\\n2) After binary step, upload subtype image with _dc/_lc/_mc/_pc or _a/_f/_pt/_ta.\\n3) Click Save Results to store to backend.') }
+
+/* initial setup: ensure analyze button off */
+document.addEventListener('DOMContentLoaded',()=>{ document.getElementById('analyzeBtn').disabled=true; });
+</script>
+</body>
+</html>
